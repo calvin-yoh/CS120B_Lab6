@@ -1,60 +1,81 @@
-/*	Author: cyoh001
+/*	Author: lab
  *  Partner(s) Name:
- *	Lab Section 22
+ *	Lab Section:
  *	Assignment: Lab #  Exercise #
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
- * Google drive link : https://drive.google.com/open?id=1X_N4Q5Vtbrt9ApS93kLnp7CGBLDE400O
  */
-
 #include <avr/io.h>
-#include <stdlib.h>
+#include <avr/interrupt.h>
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
-#endif	
+#include "timer.h"
+#endif
 
-int main(void) {
-	DDRA = 0x00; PORTA = 0xFF;
-	DDRC = 0xFF; PORTC = 0x00;
-	unsigned char tempA = 0x00;
-	unsigned char tempC = 0x00;
+void Tick();
+enum States { START, FIRST, SECOND, THIRD }state;
+unsigned char tempB = 0x00;
 
+int main(void)
+{
+	DDRB = 0xFF;
+	tempB = 0x00;
+	state = START;
+	TimerSet(500);
+	TimerOn();
 	while (1) {
-
-		tempA = ~PINA & 0x0F;
-
-		if (tempA == 0x00)
-		{
-			tempC = 0x40;
-		}
-		else if (tempA == 0x01 || tempA == 0x02)
-		{
-			tempC = 0x60;
-		}
-		else if (tempA == 0x03 || tempA == 0x04)
-		{
-			tempC = 0x70;
-		}
-		else if (tempA == 0x05 || tempA == 0x06)
-		{
-			tempC = 0x38;
-		}
-		else if (tempA == 0x07 || tempA == 0x08 || tempA == 0x09)
-		{
-			tempC = 0x3C;
-		}
-		else if (tempA == 0x0A || tempA == 0x0B || tempA == 0x0C)
-		{
-			tempC = 0x3E;
-		}
-		else
-		{
-			tempC = 0x3F;
-		}
-
-		PORTC = tempC;
+		Tick();
+		// Wait 1 sec
+		while (!TimerFlag);
+		TimerFlag = 0;
 	}
-	return 0;
+}
+
+void Tick() {
+	switch (state) { //transitions
+	case START:
+	{
+		tempB = 0x00;
+		state = FIRST;
+		break;
+	}
+	case FIRST:
+	{
+		state = SECOND;
+		break;
+	}
+	case SECOND:
+	{
+		state = THIRD;
+		break;
+	}
+	case THIRD:
+	{
+		state = FIRST;
+		break;
+	}
+	}
+	switch (state) { //state actions
+	case START:
+		break;
+
+	case FIRST:
+	{
+		tempB = 0x01;
+		break;
+	}
+	case SECOND:
+	{
+		tempB = 0x02;
+		break;
+	}
+	case THIRD:
+	{
+		tempB = 0x04;
+		break;
+	}
+	}
+	PORTB = tempB;
 }

@@ -14,20 +14,68 @@
 #include "timer.h"
 #endif
 
+void Tick();
+enum States { START, FIRST, SECOND, THIRD }state;
+unsigned char tempB = 0x00;
 
-int main(void) {
-    /* Insert DDR and PORT initializations */
-    DDRB = 0xFF;
-    PORTB = 0x00;
-    TimerSet(1000);
-    TimerOn();
-    unsigned char tmpB = 0x00;
-    /* Insert your solution below */
-    while (1) {
-        tmpB = ~tmpB;
-        PORTB = tmpB;
-        while (!TimerFlag);
-        TimerFlag = 0;
-    }
-    return 1;
+int main(void)
+{
+	DDRB = 0xFF;
+	tempB = 0x00;
+	state = START;
+	TimerSet(500);
+	TimerOn();
+	while (1) {
+		Tick();
+		// Wait 1 sec
+		while (!TimerFlag);
+		TimerFlag = 0;
+	}
+}
+
+void Tick() {
+	switch (state) { //transitions
+	case START:
+	{
+		tempB = 0x00;
+		state = FIRST;
+		break;
+	}
+	case FIRST:
+	{
+		state = SECOND; 
+		break;
+	}
+	case SECOND:
+	{
+		state = THIRD; 
+		break;
+	}
+	case THIRD:
+	{
+		state = FIRST; 
+		break;
+	}
+	}
+	switch (state) { //state actions
+	case START:
+		break;
+
+	case FIRST:
+	{
+		tempB = 0x01; 
+		break;
+	}
+	case SECOND:
+	{
+		tempB = 0x02; 
+		break;
+	}
+	case THIRD:
+	{
+		tempB = 0x04; 
+		break;
+	}
+	}
+	PORTB = tempB;
 }
