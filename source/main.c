@@ -19,7 +19,7 @@ int main(void) {
     PORTB = 0x00;
     TimerSet(1000);
     TimerOn();
-    unsigned chat tmpB = 0x00;
+    unsigned char tmpB = 0x00;
     /* Insert your solution below */
     while (1) {
         tmpB = ~tmpB;
