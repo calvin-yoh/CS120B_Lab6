@@ -23,7 +23,7 @@ int main(void)
 	DDRB = 0xFF;
 	tempB = 0x00;
 	state = START;
-	TimerSet(500);
+	TimerSet(1000);
 	TimerOn();
 	while (1) {
 		Tick();
