@@ -145,8 +145,6 @@ void Tick() {
 			break;
 		}
 	}
-	case Wait:
-		break;
 	case Reset:
 	{
 		tempB = 0x00;
