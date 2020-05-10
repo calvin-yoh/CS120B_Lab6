@@ -1,5 +1,5 @@
 /*	Author: lab
- *  Partner(s) Name: 
+ *  Partner(s) Name:
  *	Lab Section:
  *	Assignment: Lab #  Exercise #
  *	Exercise Description: [optional - include for your own benefit]
@@ -15,27 +15,30 @@
 #endif
 
 void Tick();
-enum States { START, FIRST, SECOND, THIRD }state;
+enum States { Start, FIRST, SECOND, THIRD, STOP, RESTART } state;
+unsigned char tempA = 0x00;
 unsigned char tempB = 0x00;
 
 int main(void)
 {
-	DDRB = 0xFF;
-	tempB = 0x00;
-	state = START;
-	TimerSet(1000);
+	DDRA = 0x00;	PORTA = 0xFF;
+	DDRB = 0xFF;	PORTB = 0x00;
+	state = Start;
+	TimerSet(300);
 	TimerOn();
 	while (1) {
 		Tick();
-		// Wait 1 sec
 		while (!TimerFlag);
 		TimerFlag = 0;
 	}
 }
 
-void Tick() {
-	switch (state) { //transitions
-	case START:
+void Tick()
+{
+	tempA = ~PINA;
+	switch (state) //Transitions
+	{
+	case Start:
 	{
 		tempB = 0x00;
 		state = FIRST;
@@ -43,39 +46,93 @@ void Tick() {
 	}
 	case FIRST:
 	{
-		state = SECOND; 
-		break;
+		if (tempA == 0x01)
+		{
+			state = STOP;
+			break;
+		}
+		else
+		{
+			state = SECOND;
+			break;
+		}
 	}
 	case SECOND:
 	{
-		state = THIRD; 
-		break;
+		if (tempA == 0x01)
+		{
+			state = STOP;
+			break;
+		}
+		else
+		{
+			state = THIRD;
+			break;
+		}
 	}
 	case THIRD:
 	{
-		state = FIRST; 
-		break;
+		if (tempA == 0x01)
+		{
+			state = STOP;
+			break;
+		}
+		else
+		{
+			state = FIRST;
+			break;
+		}
 	}
+	case STOP:
+	{
+		if (tempA == 0x01)
+		{
+			state = STOP;
+			break;
+		}
+		else
+		{
+			state = RESTART;
+			break;
+		}
 	}
-	switch (state) { //state actions
-	case START:
-		break;
+	case RESTART:
+	{
+		if (tempA == 0x01)
+		{
+			state = FIRST;
+			break;
+		}
+		else
+		{
+			state = RESTART;
+			break;
+		}
 
+	}
+	default:
+		break;
+	}
+
+	switch (state) //State Actions
+	{
 	case FIRST:
 	{
-		tempB = 0x01; 
+		tempB = 0x01;
 		break;
 	}
 	case SECOND:
 	{
-		tempB = 0x02; 
+		tempB = 0x02;
 		break;
 	}
 	case THIRD:
 	{
-		tempB = 0x04; 
+		tempB = 0x04;
 		break;
 	}
+	default:
+		break;
 	}
 	PORTB = tempB;
 }
