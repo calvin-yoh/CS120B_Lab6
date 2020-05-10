@@ -89,7 +89,7 @@ void Tick() {
 		else if (tempA == 0x02)
 		{
 			decreaseTimer++;
-			state = Wait;
+			state = WaitDec;
 			break;
 		}
 		else if (tempA == 0x03)
