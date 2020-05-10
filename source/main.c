@@ -79,7 +79,7 @@ void Tick()
 		}
 		else
 		{
-			state = FIRST;
+			state = SECOND;
 			break;
 		}
 	}
