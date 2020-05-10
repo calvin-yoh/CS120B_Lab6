@@ -2,18 +2,20 @@
  *  Partner(s) Name:
  *	Lab Section:
  *	Assignment: Lab #  Exercise #
- *	Exercise Description: [optional - Secondlude for your own benefit]
+ *	Exercise Description: [optional - Increaselude for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
  */
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <stdlib.h>	
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
+#include "timer.h"
 #endif	
 
-enum States { Start, First, Second, Third, Fourth, Fifth, WaitOne, WaitTwo, WaitThree, WaitFour, WaitFive }state;
+enum States { Start, Begin, Increase, Decrease, Wait, Reset }state;
 unsigned char tempB = 0x00;
 unsigned char tempA = 0x00;
 
@@ -21,92 +23,61 @@ void Tick() {
 	tempA = ~PINA;
 	switch (state) { //Transitions
 	case Start:
-		state = First;
+	{
+		state = Begin;
 		break;
-	case First:
+	}
+	case Begin:
 		if (tempA == 0x01)
 		{
-			state = WaitOne;
+			state = Increase;
 			break;
-		}		
-	case WaitOne:
-		if (tempA == 0x01)
+		}
+		else if (tempA == 0x02)
 		{
-			state = WaitOne;
+			state = Decrease;
+			break;
+		}
+		else if (tempA == 0x03)
+		{
+			state = Reset;
 			break;
 		}
 		else
 		{
-			state = Second;
+			state = Begin;
 			break;
 		}
-	case Second:
-		if (tempA == 0x01)
+	case Increase:
+		state = Wait;
+		break;
+	case Decrease:
+		state = Wait;
+		break;
+	case Wait:
+		if ((tempA == 0x01) || (tempA == 0x02))
 		{
-			state = WaitTwo;
+			state = Wait;
 			break;
 		}
-	case WaitTwo:
-		if (tempA == 0x01)
+		else if (tempA == 0x03)
 		{
-			state = WaitTwo;
-			break;
-		}
-		else
-		{
-			state = Third;
-			break;
-		}
-	case Third:
-		if (tempA == 0x01)
-		{
-			state = WaitThree;
-			break;
-		}
-	case WaitThree:
-		if (tempA == 0x01)
-		{
-			state = WaitThree;
+			state = Reset;
 			break;
 		}
 		else
 		{
-			state = Fourth;
+			state = Begin;
 			break;
 		}
-	case Fourth:
-		if (tempA == 0x01)
+	case Reset:
+		if ((tempA == 0x01) || (tempA == 0x02))
 		{
-			state = WaitFour;
-			break;
-		}
-	case WaitFour:
-		if (tempA == 0x01)
-		{
-			state = WaitFour;
-			break;
+			state = Reset; break;
 		}
 		else
 		{
-			state = Fifth;
-			break;
-		}
-	case Fifth:
-		if (tempA == 0x01)
-		{
-			state = WaitFive;
-			break;
-		}
-	case WaitFive:
-		if (tempA == 0x01)
-		{
-			state = WaitFive;
-			break;
-		}
-		else
-		{
-			state = First;
-			break;
+			state = Begin; break;
 		}
 	default:
 		state = Start;
@@ -114,25 +85,39 @@ void Tick() {
 	}
 
 	switch (state) { //State actions
-	case First:
-		tempB = 0x05;
+	case Begin:
 		break;
-	case Second:
+	case Increase:
 	{
-		tempB = 0x0A;
-		break;
+		if (tempB >= 0x09)
+		{
+			tempB = 0x09;
+			break;
+		}
+		else
+		{
+			tempB = tempB + 0x01;
+			break;
+		}
 	}
-	case Third:
+	case Decrease:
 	{
-		tempB = 0x14;
-		break;
+		if (tempB <= 0x00)
+		{
+			tempB = 0x00;
+			break;
+		}
+		else
+		{
+			tempB = tempB - 0x01;
+			break;
+		}
 	}
-	case Fourth:
-		tempB = 0x28;
+	case Wait:
 		break;
-	case Fifth:
+	case Reset:
 	{
-		tempB = 0x3F;
+		tempB = 0x00;
 		break;
 	}
 	default:
@@ -145,11 +130,16 @@ void Tick() {
 int main(void)
 {
 	state = Start;
+	tempB = 0x00;
 	DDRA = 0x00;	PORTA = 0xFF;
 	DDRB = 0xFF;	PORTB = 0x00;
+	TimerSet(100);
+	TimerOn();
 	while (1)
 	{
 		Tick();
+		while (!TimerFlag);
+		TimerFlag = 0;
 	}
 	return 0;
 }
