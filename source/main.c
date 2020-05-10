@@ -144,6 +144,11 @@ void Tick()
 		tempB = 0x04;
 		break;
 	}
+	case SECONDSECOND:
+	{
+		tempB = 0x02;
+		break;
+	}
 	default:
 		break;
 	}
