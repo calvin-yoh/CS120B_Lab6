@@ -2,7 +2,7 @@
  *  Partner(s) Name:
  *	Lab Section:
  *	Assignment: Lab #  Exercise #
- *	Exercise Description: [optional - Increaselude for your own benefit]
+ *	
  *
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
