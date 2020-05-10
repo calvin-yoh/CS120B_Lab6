@@ -15,7 +15,7 @@
 #endif
 
 void Tick();
-enum States { Start, FIRST, SECOND, THIRD, STOP, RESTART } state;
+enum States { Start, FIRST, SECOND, THIRD, SECONDSECOND, STOP, RESTART } state;
 unsigned char tempA = 0x00;
 unsigned char tempB = 0x00;
 
@@ -79,7 +79,20 @@ void Tick()
 		}
 		else
 		{
-			state = SECOND;
+			state = SECONDSECOND;
+			break;
+		}
+	}
+	case SECONDSECOND:
+	{
+		if (tempA == 0x01)
+		{
+			state = STOP;
+			break;
+		}
+		else
+		{
+			state = FIRST;
 			break;
 		}
 	}
